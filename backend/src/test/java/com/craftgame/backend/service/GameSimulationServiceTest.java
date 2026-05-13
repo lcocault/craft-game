@@ -63,7 +63,7 @@ class GameSimulationServiceTest {
     }
 
     @Test
-    void lowMoraleShouldTriggerAttritionEvent() {
+    void simulatesAttritionWhenMoraleIsLow() {
         GameSimulationService service = new GameSimulationService(new Random(0));
         service.startScenario();
 
