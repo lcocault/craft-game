@@ -44,7 +44,7 @@ public class GameSimulationService {
         applyDeliveryPressure(request.delivery());
 
         updateTechnicalDebt(request.delivery().acceptTechnicalDebt(), request.practices().refactoring());
-        updateMorale(request.delivery().overtime(), request.practices());
+        updateMorale(request.delivery().overtime(), request.practices(), events);
         updateDefects(request.delivery(), request.practices());
         updateVelocity(request.delivery());
         triggerRandomEvents(events);
@@ -121,7 +121,7 @@ public class GameSimulationService {
         state.techDebt = Math.max(0, state.techDebt);
     }
 
-    private void updateMorale(boolean overtime, PracticesDecision practices) {
+    private void updateMorale(boolean overtime, PracticesDecision practices, List<String> events) {
         state.morale -= overtime ? 10 : 0;
         boolean codeQualityImprovement = practices.codeReview() || practices.refactoring() || practices.automatedTesting();
         state.morale += codeQualityImprovement ? 5 : 0;
@@ -130,6 +130,7 @@ public class GameSimulationService {
 
         if (state.morale < 40 && random.nextDouble() < 0.5) {
             state.baseVelocity = Math.max(1, state.baseVelocity - 2);
+            events.add("Low morale drives attrition, reducing team capacity.");
         }
     }
 

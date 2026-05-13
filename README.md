@@ -8,7 +8,7 @@ The repository currently contains the Spring Boot backend for the simulation gam
 ### Run locally
 
 ```bash
-cd /home/runner/work/craft-game/craft-game/backend
+cd backend
 ./mvnw spring-boot:run
 ```
 

@@ -61,4 +61,22 @@ class GameSimulationServiceTest {
         assertThat(finalResult.gameOver()).isTrue();
         assertThat(finalResult.finalScore()).isNotNull();
     }
+
+    @Test
+    void lowMoraleShouldTriggerAttritionEvent() {
+        GameSimulationService service = new GameSimulationService(new Random(0));
+        service.startScenario();
+
+        SprintResult result = null;
+        for (int i = 0; i < 5; i++) {
+            result = service.runSprint(new SprintDecisionRequest(
+                    new StaffingDecision(0, 0, 0),
+                    new PracticesDecision(false, false, false, false),
+                    new DeliveryDecision(true, false, false)
+            ));
+        }
+
+        assertThat(result).isNotNull();
+        assertThat(result.events()).contains("Low morale drives attrition, reducing team capacity.");
+    }
 }
