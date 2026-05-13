@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -49,5 +50,12 @@ class GameControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.metrics.sprint").value(1))
                 .andExpect(jsonPath("$.events").isArray());
+    }
+
+    @Test
+    void rootShouldServeMvpFrontEnd() throws Exception {
+        mockMvc.perform(get("/"))
+                .andExpect(status().isOk())
+                .andExpect(forwardedUrl("index.html"));
     }
 }

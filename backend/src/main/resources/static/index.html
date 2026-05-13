@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Craft Game MVP</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 1.5rem;
+            background: #f5f7fb;
+            color: #1d2433;
+        }
+
+        main {
+            max-width: 960px;
+            margin: 0 auto;
+            display: grid;
+            gap: 1rem;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        h1, h2 {
+            margin: 0 0 0.8rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.8rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 0.45rem;
+        }
+
+        .checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.35rem 0;
+        }
+
+        button {
+            border: none;
+            border-radius: 6px;
+            padding: 0.55rem 0.9rem;
+            cursor: pointer;
+            background: #2563eb;
+            color: white;
+            font-weight: bold;
+        }
+
+        button.secondary {
+            background: #334155;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 0.45rem;
+            border-bottom: 1px solid #e6e8ee;
+        }
+
+        #events {
+            margin: 0;
+            padding-left: 1.2rem;
+        }
+
+        .status {
+            margin-top: 0.8rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<main>
+    <section class="panel">
+        <h1>Craft Game MVP Front-End</h1>
+        <p>Run the software-delivery simulation by starting a scenario, choosing sprint decisions, and tracking team metrics.</p>
+        <button id="startButton">Start Scenario</button>
+        <button id="refreshButton" class="secondary">Refresh State</button>
+        <div id="status" class="status"></div>
+    </section>
+
+    <section class="panel">
+        <h2>Current Metrics</h2>
+        <table>
+            <tbody id="metricsTableBody"></tbody>
+        </table>
+    </section>
+
+    <section class="panel">
+        <h2>Sprint Decisions</h2>
+        <form id="decisionForm">
+            <div class="grid">
+                <div>
+                    <label for="hireSenior">Hire senior</label>
+                    <input id="hireSenior" type="number" min="0" value="0">
+                </div>
+                <div>
+                    <label for="hireJunior">Hire junior</label>
+                    <input id="hireJunior" type="number" min="0" value="0">
+                </div>
+                <div>
+                    <label for="fire">Fire</label>
+                    <input id="fire" type="number" min="0" value="0">
+                </div>
+            </div>
+
+            <div class="grid" style="margin-top: 1rem;">
+                <div>
+                    <h3>Practices</h3>
+                    <label class="checkbox"><input id="automatedTesting" type="checkbox">Automated testing</label>
+                    <label class="checkbox"><input id="ciCd" type="checkbox">CI/CD</label>
+                    <label class="checkbox"><input id="codeReview" type="checkbox">Code review</label>
+                    <label class="checkbox"><input id="refactoring" type="checkbox">Refactoring</label>
+                </div>
+                <div>
+                    <h3>Delivery pressure</h3>
+                    <label class="checkbox"><input id="overtime" type="checkbox">Overtime</label>
+                    <label class="checkbox"><input id="skipTests" type="checkbox">Skip tests</label>
+                    <label class="checkbox"><input id="acceptTechnicalDebt" type="checkbox">Accept technical debt</label>
+                </div>
+            </div>
+            <button type="submit" style="margin-top: 1rem;">Run Sprint</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>Events</h2>
+        <ul id="events"></ul>
+    </section>
+</main>
+<script>
+    const statusNode = document.getElementById('status');
+    const metricsBody = document.getElementById('metricsTableBody');
+    const eventsNode = document.getElementById('events');
+
+    function setStatus(message) {
+        statusNode.textContent = message;
+    }
+
+    function renderMetrics(metrics, gameOver) {
+        if (!metrics) {
+            metricsBody.innerHTML = '';
+            return;
+        }
+
+        const entries = [
+            ['Sprint', metrics.sprint],
+            ['Velocity', metrics.velocity],
+            ['Quality', metrics.quality],
+            ['Defects', metrics.defects],
+            ['Tech debt', metrics.techDebt],
+            ['Morale', metrics.morale],
+            ['Cost', metrics.cost],
+            ['Client satisfaction', metrics.clientSatisfaction],
+            ['Game over', gameOver ? 'Yes' : 'No']
+        ];
+
+        metricsBody.innerHTML = entries
+            .map(([label, value]) => `<tr><th>${label}</th><td>${value}</td></tr>`)
+            .join('');
+    }
+
+    function renderEvents(events) {
+        eventsNode.innerHTML = (events || [])
+            .map((event) => `<li>${event}</li>`)
+            .join('');
+    }
+
+    async function startScenario() {
+        const response = await fetch('/api/game/start', { method: 'POST' });
+        if (!response.ok) {
+            throw new Error('Failed to start scenario.');
+        }
+        const state = await response.json();
+        renderMetrics(state.metrics, state.gameOver);
+        renderEvents([]);
+        setStatus(`Scenario "${state.scenario}" started (${state.duration} sprints).`);
+    }
+
+    async function refreshState() {
+        const response = await fetch('/api/game/state');
+        if (!response.ok) {
+            throw new Error('Failed to fetch game state.');
+        }
+        const state = await response.json();
+        renderMetrics(state.metrics, state.gameOver);
+        setStatus(`Current scenario: ${state.scenario} (${state.duration} sprints).`);
+    }
+
+    function decisionPayload() {
+        const number = (id) => Number.parseInt(document.getElementById(id).value || '0', 10);
+        const checked = (id) => document.getElementById(id).checked;
+        return {
+            staffing: {
+                hireSenior: Math.max(0, number('hireSenior')),
+                hireJunior: Math.max(0, number('hireJunior')),
+                fire: Math.max(0, number('fire'))
+            },
+            practices: {
+                automatedTesting: checked('automatedTesting'),
+                ciCd: checked('ciCd'),
+                codeReview: checked('codeReview'),
+                refactoring: checked('refactoring')
+            },
+            delivery: {
+                overtime: checked('overtime'),
+                skipTests: checked('skipTests'),
+                acceptTechnicalDebt: checked('acceptTechnicalDebt')
+            }
+        };
+    }
+
+    async function runSprint(event) {
+        event.preventDefault();
+        const response = await fetch('/api/game/sprint', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(decisionPayload())
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to run sprint.');
+        }
+
+        const result = await response.json();
+        renderMetrics(result.metrics, result.gameOver);
+        renderEvents(result.events);
+        const scoreMessage = result.finalScore !== null ? ` Final score: ${result.finalScore}.` : '';
+        setStatus(`Sprint ${result.metrics.sprint} completed.${scoreMessage}`);
+    }
+
+    async function run(action) {
+        try {
+            await action();
+        } catch (error) {
+            setStatus(error.message);
+        }
+    }
+
+    document.getElementById('startButton').addEventListener('click', () => run(startScenario));
+    document.getElementById('refreshButton').addEventListener('click', () => run(refreshState));
+    document.getElementById('decisionForm').addEventListener('submit', (event) => run(() => runSprint(event)));
+
+    run(refreshState);
+</script>
+</body>
+</html>
