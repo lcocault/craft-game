@@ -17,6 +17,13 @@ public class GameSimulationService {
 
     private static final int LOW_MORALE_THRESHOLD = 40;
     private static final double ATTRITION_PROBABILITY = 0.5;
+    private static final double PRODUCTION_INCIDENT_PROBABILITY = 0.3;
+    private static final double TEAM_MEMBER_LEAVES_PROBABILITY = 0.2;
+    private static final double SCOPE_INCREASE_PROBABILITY = 0.25;
+    private static final int PRODUCTION_INCIDENT_DEFECTS_IMPACT = 3;
+    private static final int PRODUCTION_INCIDENT_MORALE_IMPACT = 8;
+    private static final int TEAM_MEMBER_LEAVES_VELOCITY_IMPACT = 2;
+    private static final int SCOPE_INCREASE_TECH_DEBT_IMPACT = 2;
 
     private final Random random;
     private GameState state;
@@ -138,7 +145,7 @@ public class GameSimulationService {
     }
 
     private void updateDefects(DeliveryDecision delivery, PracticesDecision practices) {
-        double automationFactor = practices.automatedTesting() ? 1.0 : state.automationLevel;
+        double automationFactor = practices.automatedTesting() ? 1.0 : 0.0;
         double defects = state.baseDefects
                 * (1 + state.techDebt * 0.02)
                 * (delivery.skipTests() ? 1.5 : 1)
@@ -169,19 +176,19 @@ public class GameSimulationService {
     }
 
     private void triggerRandomEvents(List<String> events) {
-        if (random.nextDouble() < 0.3) {
-            state.defects += 3;
-            state.morale = Math.max(0, state.morale - 8);
+        if (random.nextDouble() < PRODUCTION_INCIDENT_PROBABILITY) {
+            state.defects += PRODUCTION_INCIDENT_DEFECTS_IMPACT;
+            state.morale = Math.max(0, state.morale - PRODUCTION_INCIDENT_MORALE_IMPACT);
             events.add("Production incident hit the team: defects increased and morale dropped.");
         }
-        if (random.nextDouble() < 0.2) {
-            state.baseVelocity = Math.max(1, state.baseVelocity - 2);
+        if (random.nextDouble() < TEAM_MEMBER_LEAVES_PROBABILITY) {
+            state.baseVelocity = Math.max(1, state.baseVelocity - TEAM_MEMBER_LEAVES_VELOCITY_IMPACT);
             state.teamExperience = Math.max(0.3, state.teamExperience - 0.1);
             events.add("A team member leaves unexpectedly, reducing delivery capacity.");
         }
-        if (random.nextDouble() < 0.25) {
+        if (random.nextDouble() < SCOPE_INCREASE_PROBABILITY) {
             state.codeComplexity += 0.1;
-            state.techDebt += 2;
+            state.techDebt += SCOPE_INCREASE_TECH_DEBT_IMPACT;
             events.add("Scope increased this sprint, making delivery harder.");
         }
     }
