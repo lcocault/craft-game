@@ -1,9 +1,9 @@
 # craft-game
 A serious game to learn the principles of software craftsmanship and their impact on software delivery.
 
-## Step 1 (current): Backend MVP
+## Step 1 (current): MVP (Backend + Front-End)
 
-The repository currently contains the Spring Boot backend for the simulation game.
+The repository contains the Spring Boot backend and a minimal front-end for the simulation game.
 
 ### Run locally
 
@@ -23,6 +23,11 @@ mvn spring-boot:run
 - `POST /api/game/start`
 - `POST /api/game/sprint`
 - `GET /api/game/state`
+
+### Front-End
+
+- Main UI: `http://localhost:8080/`
+- The UI starts a scenario, submits sprint decisions, and displays metrics/events from backend responses.
 
 ### OpenAPI
 
