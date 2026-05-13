@@ -18,6 +18,22 @@ If Maven Wrapper is not available in your environment, use:
 mvn spring-boot:run
 ```
 
+### Run with Docker
+
+From the repository root:
+
+```bash
+cd backend
+# Run tests once, then package quickly for Docker without re-running tests.
+mvn test
+mvn package -DskipTests
+cd ..
+docker compose up --build
+```
+
+The Docker build expects `backend/target/backend-0.0.1-SNAPSHOT.jar` from the packaging step above.
+Then open `http://localhost:8080/`.
+
 ### API endpoints
 
 - `POST /api/game/start`
