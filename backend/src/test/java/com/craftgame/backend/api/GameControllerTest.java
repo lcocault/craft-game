@@ -9,9 +9,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -55,7 +55,10 @@ class GameControllerTest {
     @Test
     void rootShouldServeMvpFrontEnd() throws Exception {
         mockMvc.perform(get("/"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/index.html"))
                 .andExpect(status().isOk())
-                .andExpect(forwardedUrl("index.html"));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Craft Game MVP Front-End")));
     }
 }

@@ -211,24 +211,24 @@
     }
 
     function decisionPayload() {
-        const number = (id) => Number.parseInt(document.getElementById(id).value || '0', 10);
-        const checked = (id) => document.getElementById(id).checked;
+        const getNumericInput = (id) => parseInt(document.getElementById(id).value || '0', 10);
+        const isChecked = (id) => document.getElementById(id).checked;
         return {
             staffing: {
-                hireSenior: Math.max(0, number('hireSenior')),
-                hireJunior: Math.max(0, number('hireJunior')),
-                fire: Math.max(0, number('fire'))
+                hireSenior: Math.max(0, getNumericInput('hireSenior')),
+                hireJunior: Math.max(0, getNumericInput('hireJunior')),
+                fire: Math.max(0, getNumericInput('fire'))
             },
             practices: {
-                automatedTesting: checked('automatedTesting'),
-                ciCd: checked('ciCd'),
-                codeReview: checked('codeReview'),
-                refactoring: checked('refactoring')
+                automatedTesting: isChecked('automatedTesting'),
+                ciCd: isChecked('ciCd'),
+                codeReview: isChecked('codeReview'),
+                refactoring: isChecked('refactoring')
             },
             delivery: {
-                overtime: checked('overtime'),
-                skipTests: checked('skipTests'),
-                acceptTechnicalDebt: checked('acceptTechnicalDebt')
+                overtime: isChecked('overtime'),
+                skipTests: isChecked('skipTests'),
+                acceptTechnicalDebt: isChecked('acceptTechnicalDebt')
             }
         };
     }
@@ -248,7 +248,8 @@
         const result = await response.json();
         renderMetrics(result.metrics, result.gameOver);
         renderEvents(result.events);
-        const scoreMessage = result.finalScore !== null ? ` Final score: ${result.finalScore}.` : '';
+        const hasFinalScore = result.finalScore != null;
+        const scoreMessage = hasFinalScore ? ` Final score: ${result.finalScore}.` : '';
         setStatus(`Sprint ${result.metrics.sprint} completed.${scoreMessage}`);
     }
 
@@ -256,7 +257,8 @@
         try {
             await action();
         } catch (error) {
-            setStatus(error.message);
+            console.error(error);
+            setStatus('An error occurred. Please try again.');
         }
     }
 
