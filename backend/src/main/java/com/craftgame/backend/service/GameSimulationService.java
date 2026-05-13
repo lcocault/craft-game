@@ -15,6 +15,9 @@ import java.util.Random;
 @Service
 public class GameSimulationService {
 
+    private static final int LOW_MORALE_THRESHOLD = 40;
+    private static final double ATTRITION_PROBABILITY = 0.5;
+
     private final Random random;
     private GameState state;
 
@@ -128,18 +131,18 @@ public class GameSimulationService {
         state.morale -= (int) Math.round(state.burnoutRisk * 3);
         state.morale = Math.max(0, Math.min(100, state.morale));
 
-        if (state.morale < 40 && random.nextDouble() < 0.5) {
+        if (state.morale < LOW_MORALE_THRESHOLD && random.nextDouble() < ATTRITION_PROBABILITY) {
             state.baseVelocity = Math.max(1, state.baseVelocity - 2);
             events.add("Low morale drives attrition, reducing team capacity.");
         }
     }
 
     private void updateDefects(DeliveryDecision delivery, PracticesDecision practices) {
-        double automatedTesting = practices.automatedTesting() ? 1.0 : state.automationLevel;
+        double automationFactor = practices.automatedTesting() ? 1.0 : state.automationLevel;
         double defects = state.baseDefects
                 * (1 + state.techDebt * 0.02)
                 * (delivery.skipTests() ? 1.5 : 1)
-                * (1 - automatedTesting * 0.5);
+                * (1 - automationFactor * 0.5);
         state.defects = Math.max(0, (int) Math.round(defects));
     }
 
